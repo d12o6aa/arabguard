@@ -13,6 +13,7 @@ ArabGuard protects LLM-powered applications from prompt-injection attacks, jailb
 | **Normalization pipeline** | Deobfuscation, Base64/Hex decoding, Unicode confusables, ROT-13, split-letter payloads, emoji stripping |
 | **Arabic regex layer** | Egyptian Arabic + Franko ignore-instruction, role-change, system-access, jailbreak, adversarial and force-answer patterns |
 | **English regex layer** | Classic ignore/bypass/override, DAN/jailbreak phrases, prompt-leaking, stealthy injection, data exfiltration, encoding attacks |
+| **AI deep analysis layer** | MARBERT-based transformer model for borderline/evasive attacks that bypass regex (optional, requires `transformers` + `torch`) |
 
 ---
 
@@ -22,11 +23,17 @@ ArabGuard protects LLM-powered applications from prompt-injection attacks, jailb
 pip install arabguard
 ```
 
+**With AI layer (recommended for maximum protection):**
+
+```bash
+pip install "arabguard[ai]"
+```
+
 **With optional extras:**
 
 ```bash
 pip install "arabguard[data]"   # adds pandas for batch analysis
-pip install "arabguard[full]"   # all optional dependencies
+pip install "arabguard[full]"   # AI + data analysis
 pip install "arabguard[dev]"    # development tools
 ```
 
@@ -85,7 +92,23 @@ guard = ArabGuard(block_on_flag=True)
 
 # Custom score threshold
 guard = ArabGuard(custom_score_threshold=80)
+
+# Disable AI layer (faster, regex-only mode)
+guard = ArabGuard(use_ai=False)
+
+# Enable AI with custom model
+guard = ArabGuard(
+    use_ai=True,
+    ai_model_name="d12o6aa/ArabGuard",  # default
+    device="cuda",  # or "cpu", "mps" (auto-detect by default)
+)
 ```
+
+**AI Layer Behavior:**
+- Activates automatically for borderline cases (score 60-119)
+- Also triggers when decision is FLAG or when score > 40 without regex match
+- Upgrades decision to BLOCKED if AI predicts malicious with ≥75% confidence
+- Upgrades to FLAG if AI predicts malicious with ≥55% confidence
 
 ---
 
@@ -103,6 +126,8 @@ result.matched_pattern      # first matching regex pattern (or None)
 result.all_matched_patterns # list of all matching patterns
 result.pipeline_steps       # dict with per-stage scores
 result.reason               # human-readable explanation
+result.ai_confidence        # float 0.0–1.0 (or None if AI not used)
+result.ai_prediction        # int 0 (safe) or 1 (malicious), or None
 result.to_dict()            # full result as a plain dict
 ```
 
@@ -168,12 +193,20 @@ text, score, decision, steps = normalize_and_detect("...", debug=True)
 
 ## Dependencies
 
-| Package | Purpose |
-|---------|---------|
-| `beautifulsoup4` | HTML tag stripping |
-| `emoji` | Emoji removal |
-| `nltk` | English word corpus for deobfuscation |
-| `pandas` *(optional)* | Batch DataFrame analysis |
+| Package | Purpose | Required |
+|---------|---------|----------|
+| `beautifulsoup4` | HTML tag stripping | ✅ Core |
+| `emoji` | Emoji removal | ✅ Core |
+| `nltk` | English word corpus for deobfuscation | ✅ Core |
+| `transformers` | MARBERT AI model | ⚙️ Optional (AI layer) |
+| `torch` | PyTorch backend for AI | ⚙️ Optional (AI layer) |
+| `scipy` | Scientific computing for transformers | ⚙️ Optional (AI layer) |
+| `pandas` | Batch DataFrame analysis | ⚙️ Optional (data extras) |
+
+**Install with AI support:**
+```bash
+pip install "arabguard[ai]"
+```
 
 ---
 

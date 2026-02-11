@@ -81,6 +81,12 @@ setup(
 
     # ── Optional / extra dependencies ─────────────────────────────────────
     extras_require = {
+        # AI layer (MARBERT model from Hugging Face)
+        "ai": [
+            "transformers>=4.30.0",
+            "torch>=2.0.0",
+            "scipy>=1.9.0",
+        ],
         # Data analysis and batch processing utilities
         "data": [
             "pandas>=1.5.0",
@@ -88,6 +94,9 @@ setup(
         # Everything (install with: pip install arabguard[full])
         "full": [
             "pandas>=1.5.0",
+            "transformers>=4.30.0",
+            "torch>=2.0.0",
+            "scipy>=1.9.0",
         ],
         # Development tools
         "dev": [
