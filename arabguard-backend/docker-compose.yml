@@ -1,0 +1,83 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ArabGuard — Full-Stack Docker Compose
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Usage:
+#   docker compose up            # start backend (+ optional frontend)
+#   docker compose up --build    # rebuild images first
+#   docker compose down          # stop all containers
+#
+# Services:
+#   backend   → FastAPI on http://localhost:8000
+#   frontend  → React dashboard on http://localhost:3000 (optional, comment out)
+#
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── FastAPI Backend ──────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arabguard-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Server
+      HOST: "0.0.0.0"
+      PORT: "8000"
+      DEBUG: "false"
+      LOG_LEVEL: "info"
+
+      # CORS — allow both React dev server and production
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000"
+
+      # Model
+      MODEL_ID: "d12o6aa/ArabGuard"
+      USE_AI: "true"
+      DEVICE: "auto"      # "cuda" if GPU available
+      BLOCK_THRESHOLD: "120"
+      BLOCK_ON_FLAG: "false"
+
+      # Analytics
+      ANALYTICS_LOG_FILE: "/app/data/threat_log.jsonl"
+
+      # Hugging Face cache location
+      HF_HOME: "/cache/huggingface"
+    volumes:
+      # Persist analytics log across restarts
+      - arabguard_data:/app/data
+      # Cache MARBERT weights so they aren't re-downloaded on every container start
+      - hf_model_cache:/cache/huggingface
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s   # give model time to load on first run
+
+  # ── React Frontend (optional — comment out if running with npm run dev) ───
+  # frontend:
+  #   build:
+  #     context: ../arabguard-dashboard
+  #     dockerfile: Dockerfile
+  #   container_name: arabguard-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     VITE_API_BASE_URL: "http://localhost:8000"
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+
+
+volumes:
+  arabguard_data:
+    driver: local
+  hf_model_cache:
+    driver: local

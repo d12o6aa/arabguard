@@ -1,0 +1,152 @@
+/* ─── ArabGuard Global Styles ─────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Google Fonts imported in index.html */
+
+:root {
+  /* Brand Colors */
+  --color-bg-primary:    #090909;
+  --color-bg-secondary:  #111111;
+  --color-bg-tertiary:   #1a1a1a;
+  --color-border:        rgba(63, 63, 70, 0.5);
+  --color-border-subtle: rgba(39, 39, 42, 0.6);
+
+  /* Semantic */
+  --color-threat-blocked: #f43f5e;
+  --color-threat-flagged: #f59e0b;
+  --color-threat-safe:    #10b981;
+  --color-ai-accent:      #818cf8;
+  --color-scan-line:      rgba(16, 185, 129, 0.12);
+
+  /* Typography */
+  --font-mono:    "IBM Plex Mono", "Fira Code", monospace;
+  --font-display: "DM Sans", system-ui, sans-serif;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: #e4e4e7;
+  font-family: var(--font-display);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(63, 63, 70, 0.6);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(82, 82, 91, 0.8); }
+
+/* ── Selection ─────────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(16, 185, 129, 0.2);
+  color: #d1fae5;
+}
+
+/* ── Utility: Arabic RTL text ──────────────────────────────────────────────── */
+.arabic-text {
+  font-family: var(--font-mono);
+  direction: rtl;
+  unicode-bidi: embed;
+  text-align: right;
+}
+
+/* ── Ambient grid background ───────────────────────────────────────────────── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Scan line animation ────────────────────────────────────────────────────── */
+.scan-line {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-scan-line), transparent);
+  animation: scan-down 8s linear infinite;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+@keyframes scan-down {
+  0%   { top: -1px; opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: 100vh; opacity: 0; }
+}
+
+/* ── Glow pulse on key metrics ─────────────────────────────────────────────── */
+.metric-glow-red    { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+.metric-glow-red:hover { box-shadow: 0 0 30px rgba(244, 63, 94, 0.12); }
+
+/* ── Code block ─────────────────────────────────────────────────────────────── */
+.code-block {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(63, 63, 70, 0.5);
+  border-radius: 10px;
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+/* ── Page transitions ───────────────────────────────────────────────────────── */
+.page-enter  { opacity: 0; transform: translateY(8px); }
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+/* ── Recharts custom styles ─────────────────────────────────────────────────── */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #18181b !important;
+  border: 1px solid rgba(63, 63, 70, 0.7) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Neon border utility ─────────────────────────────────────────────────────── */
+@layer utilities {
+  .border-glow-emerald {
+    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3),
+                inset 0 0 0 1px rgba(16, 185, 129, 0.1);
+  }
+  .border-glow-rose {
+    box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.3),
+                inset 0 0 0 1px rgba(244, 63, 94, 0.1);
+  }
+  .text-gradient-emerald {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-threat {
+    background: linear-gradient(135deg, #f43f5e, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
